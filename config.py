@@ -1,0 +1,83 @@
+from typing import List, Dict, Any
+
+# Настройки источников VPN-ссылок
+SOURCES: Dict[str, List[str]] = {
+    "white_list": [
+        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/26.txt"
+    ],
+    "regular": [
+        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/6.txt",
+        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/22.txt",
+        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/24.txt",
+        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/25.txt"
+    ]
+}
+
+# Поддерживаемые схемы VPN
+SCHEMES: List[str] = ["vless", "vmess", "trojan", "shadowsocks"]
+
+# Строки локализации (i18n)
+LANG_STRINGS: Dict[str, Dict[str, Any]] = {
+    "ru": {
+        "title": "FreedomNet - Сборщик ссылок",
+        "load": "Загрузить источники",
+        "filter_btn": "Фильтровать",
+        "copy_btn": "Копировать",
+        "save_btn": "Сохранить",
+        "scheme_all": "Все схемы",
+        "type_all": "Все типы",
+        "port_placeholder": "Порт (443, 80-443)",
+        "sni_placeholder": "SNI (значение, напр. vk.ru)",
+        "ip_placeholder": "IP (158.160.)",
+        "generic_placeholder": "Общий поиск (любое)",
+        "max_placeholder": "Макс. вывод",
+        "theme_label": "Светлая тема",
+        "status_wait": "Ожидание действий...",
+        "status_loading": "Загрузка источников...",
+        "status_loading_url": "Загрузка: {url}",
+        "status_ok": "[OK] {count} ссылок из {url}",
+        "status_error": "[Ошибка] {url}: {error}",
+        "status_done": "Готово! Загружено {count} ссылок.",
+        "status_filtered": "Отфильтровано: {count} ссылок.",
+        "copy_info_title": "Готово",
+        "copy_info_msg": "Скопировано {count} ссылок.",
+        "save_warn_title": "Внимание",
+        "save_warn_msg": "Нет ссылок для сохранения.",
+        "save_info_title": "Готово",
+        "save_info_msg": "Сохранено {count} ссылок в {file}.",
+        "save_dialog_title": "Сохранить ссылки в файл",
+        "save_dialog_file": "freedom_links.txt",
+        "regex_error": "Ошибка фильтрации"
+    },
+    "en": {
+        "title": "FreedomNet - Link Collector",
+        "load": "Load Sources",
+        "filter_btn": "Filter",
+        "copy_btn": "Copy",
+        "save_btn": "Save",
+        "scheme_all": "All Schemes",
+        "type_all": "All Types",
+        "port_placeholder": "Port (443, 80-443)",
+        "sni_placeholder": "SNI (value, e.g. vk.ru)",
+        "ip_placeholder": "IP (158.160.)",
+        "generic_placeholder": "Generic Search (any)",
+        "max_placeholder": "Max. output",
+        "theme_label": "Light Theme",
+        "status_wait": "Waiting for action...",
+        "status_loading": "Loading sources...",
+        "status_loading_url": "Loading: {url}",
+        "status_ok": "[OK] {count} links from {url}",
+        "status_error": "[ERROR] {url}: {error}",
+        "status_done": "Done! Loaded {count} links.",
+        "status_filtered": "Filtered: {count} links.",
+        "copy_info_title": "Done",
+        "copy_info_msg": "Copied {count} links.",
+        "save_warn_title": "Warning",
+        "save_warn_msg": "No links to save.",
+        "save_info_title": "Done",
+        "save_info_msg": "Saved {count} links to {file}.",
+        "save_dialog_title": "Save links to file",
+        "save_dialog_file": "freedom_links.txt",
+        "regex_error": "Filtering Error"
+    }
+}
