@@ -1,20 +1,47 @@
 from typing import List, Dict, Any
 
-# Настройки источников VPN-ссылок
-SOURCES: Dict[str, List[str]] = {
-    "white_list": [
-        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/26.txt"
-    ],
-    "regular": [
-        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/6.txt",
-        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/22.txt",
-        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/24.txt",
-        "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/25.txt"
-    ]
+# Поддерживаемые схемы VPN
+SCHEMES: List[str] = ["vless", "vmess", "trojan", "shadowsocks", "hysteria2"]
+
+# Источники для режима "Проводной интернет"
+WIRED_MODE_SOURCES = {
+    "black": { # ЧЕРНЫЕ СПИСКИ (для проводных сетей)
+        "BLACK_VLESS_RUS_mobile": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt",
+        "BLACK_VLESS_RUS": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS.txt",
+        "BLACK_SS+All_RUS": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_SS+All_RUS.txt",
+        "BLACK-LIST-1": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/1.txt",
+        "BLACK-LIST-6": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/6.txt",
+        "BLACK-LIST-22": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/22.txt",
+        "BLACK-LIST-23": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/23.txt",
+        "BLACK-LIST-24": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/24.txt",
+    },
+    "white": { # БЕЛЫЕ СПИСКИ (для беспроводных сетей)
+        "Vless-Reality-White-Lists-Rus-Mobile": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt",
+        "Vless-Reality-White-Lists-Rus-Mobile-2": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile-2.txt",
+        "WHITE-CIDR-RU-all.txt": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt",
+        "WHITE-CIDR-26": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt",
+    }
 }
 
-# Поддерживаемые схемы VPN
-SCHEMES: List[str] = ["vless", "vmess", "trojan", "shadowsocks"]
+# Источники для режима "Мобильный интернет"
+MOBILE_MODE_SOURCES = {
+    "black": { # ЧЕРНЫЕ СПИСКИ (для проводных сетей)
+        "BLACK_VLESS_RUS_mobile": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt&lang=de-de",
+        "BLACK_VLESS_RUS": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS.txt&lang=de-de",
+        "BLACK_SS+All_RUS": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_SS+All_RUS.txt&lang=de-de",
+        "BLACK-LIST-1": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/1.txt&lang=de-de",
+        "BLACK-LIST-6": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/6.txt&lang=de-de",
+        "BLACK-LIST-22": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/22.txt&lang=de-de",
+        "BLACK-LIST-23": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/23.txt&lang=de-de",
+        "BLACK-LIST-24": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/24.txt&lang=de-de",
+    },
+    "white": { # БЕЛЫЕ СПИСКИ (для беспроводных сетей)
+        "Vless-Reality-White-Lists-Rus-Mobile": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt&lang=de-de",
+        "Vless-Reality-White-Lists-Rus-Mobile-2": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile-2.txt&lang=de-de",
+        "WHITE-CIDR-RU-all.txt": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt&lang=de-de",
+        "WHITE-CIDR-26": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt&lang=de-de",
+    }
+}
 
 # Строки локализации (i18n)
 LANG_STRINGS: Dict[str, Dict[str, Any]] = {
@@ -26,8 +53,13 @@ LANG_STRINGS: Dict[str, Dict[str, Any]] = {
         "save_btn": "Сохранить",
         "scheme_all": "Все схемы",
         "type_all": "Все типы",
+        "type_black": "ЧЕРНЫЕ СПИСКИ",
+        "type_white": "БЕЛЫЕ СПИСКИ",
+        "sub_all": "Все подписки",
+        "mode_wired": "Проводной интернет",
+        "mode_mobile": "Мобильный интернет",
         "port_placeholder": "Порт (443, 80-443)",
-        "sni_placeholder": "SNI (значение, напр. vk.ru)",
+        "sni_placeholder": "SNI (напр. vk.ru)",
         "ip_placeholder": "IP (158.160.)",
         "generic_placeholder": "Общий поиск (любое)",
         "max_placeholder": "Макс. вывод",
@@ -35,8 +67,9 @@ LANG_STRINGS: Dict[str, Dict[str, Any]] = {
         "status_wait": "Ожидание действий...",
         "status_loading": "Загрузка источников...",
         "status_loading_url": "Загрузка: {url}",
-        "status_ok": "[OK] {count} ссылок из {url}",
-        "status_error": "[Ошибка] {url}: {error}",
+        "status_ok": "[OK] {count} ссылок из {name}",
+        "status_error": "[Ошибка] {name}: {error}",
+        "status_captcha": "[Капча] {name} требует решения капчи Яндексом.",
         "status_done": "Готово! Загружено {count} ссылок.",
         "status_filtered": "Отфильтровано: {count} ссылок.",
         "copy_info_title": "Готово",
@@ -54,13 +87,16 @@ LANG_STRINGS: Dict[str, Dict[str, Any]] = {
         "table_link": "Ссылка",
         "copy_all_info_msg": "Скопировано {count} отфильтрованных ссылок.",
         "copy_selected_info_msg": "Скопировано {count} выделенных ссылок.",
-        "copy_info_title": "Копирование завершено",
         "copy_empty_warn": "Нет ссылок для копирования.",
-        "save_info_title": "Сохранение завершено",
-        "save_warn_title": "Предупреждение",
-        "save_warn_msg": "Нет отфильтрованных ссылок для сохранения.",
         "save_all_info_msg": "Сохранено {count} отфильтрованных ссылок в файл '{file}'.", 
         "save_selected_info_msg": "Сохранено {count} выделенных ссылок в файл '{file}'.",
+        "captcha_error_title": "Капча обнаружена",
+        "captcha_error_msg": "При загрузке ссылок из {name} вернулась captcha.",
+        "if_captcha_btn": "Если капча",
+        "captcha_links_title": "Ручной переход по ссылкам",
+        "wired_networks": "Для проводных сетей:",
+        "wireless_networks": "Для беспроводных сетей:",
+        "open_link_btn": "Перейти по ссылке"
     },
     "en": {
         "title": "FreedomNet - Link Collector",
@@ -70,8 +106,13 @@ LANG_STRINGS: Dict[str, Dict[str, Any]] = {
         "save_btn": "Save",
         "scheme_all": "All Schemes",
         "type_all": "All Types",
+        "type_black": "BLACK LISTS",
+        "type_white": "WHITE LISTS",
+        "sub_all": "All Subscriptions",
+        "mode_wired": "Wired Internet",
+        "mode_mobile": "Mobile Internet",
         "port_placeholder": "Port (443, 80-443)",
-        "sni_placeholder": "SNI (value, e.g. vk.ru)",
+        "sni_placeholder": "SNI (e.g. vk.ru)",
         "ip_placeholder": "IP (158.160.)",
         "generic_placeholder": "Generic Search (any)",
         "max_placeholder": "Max. output",
@@ -79,8 +120,9 @@ LANG_STRINGS: Dict[str, Dict[str, Any]] = {
         "status_wait": "Waiting for action...",
         "status_loading": "Loading sources...",
         "status_loading_url": "Loading: {url}",
-        "status_ok": "[OK] {count} links from {url}",
-        "status_error": "[ERROR] {url}: {error}",
+        "status_ok": "[OK] {count} links from {name}",
+        "status_error": "[ERROR] {name}: {error}",
+        "status_captcha": "[Captcha] {name} requires Yandex Captcha solving.",
         "status_done": "Done! Loaded {count} links.",
         "status_filtered": "Filtered: {count} links.",
         "copy_info_title": "Done",
@@ -98,12 +140,15 @@ LANG_STRINGS: Dict[str, Dict[str, Any]] = {
         "table_link": "Link",
         "copy_all_info_msg": "Copied {count} filtered links.",
         "copy_selected_info_msg": "Copied {count} selected links.",
-        "copy_info_title": "Copying Complete",
         "copy_empty_warn": "No links to copy.",
-        "save_info_title": "Saving Complete",
-        "save_warn_title": "Warning",
-        "save_warn_msg": "No filtered links to save.",
         "save_all_info_msg": "Saved {count} filtered links to '{file}'.",
         "save_selected_info_msg": "Saved {count} selected links to '{file}'.",
+        "captcha_error_title": "Captcha Detected",
+        "captcha_error_msg": "A captcha was returned when loading links from {name}.",
+        "if_captcha_btn": "If captcha",
+        "captcha_links_title": "Manual link navigation",
+        "wired_networks": "For wired networks:",
+        "wireless_networks": "For wireless networks:",
+        "open_link_btn": "Open Link"
     }
 }

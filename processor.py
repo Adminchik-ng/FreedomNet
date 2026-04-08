@@ -1,4 +1,5 @@
 import re
+import html
 from typing import List, Dict, Optional, Tuple, Any
 from models import LinkItem
 
@@ -7,14 +8,22 @@ class LinkProcessor:
 
     @staticmethod
     def parse_links(text: str, source_type: str) -> List[LinkItem]:
-        """Парсит ссылки по схемам (vless, vmess, trojan, shadowsocks)."""
-        pattern = r"(?:vless|vmess|trojan|shadowsocks)://[^\s]+"
+        """Парсит ссылки по схемам (vless, vmess, trojan, shadowsocks, ss, hysteria2)."""
+        # Экранируем HTML сущности перед парсингом, чтобы ссылки из Яндекса читались корректно
+        text = html.unescape(text)
+        
+        # Обновленный паттерн с hysteria2 и ограничением на кавычки/скобки, чтобы не захватывать HTML теги
+        pattern = r"(?:vless|vmess|trojan|shadowsocks|ss|hysteria2)://[^\s\"\'<>]+"
         found_links = re.findall(pattern, text)
+        
+        # Удаляем дубликаты с сохранением порядка
+        unique_links = list(dict.fromkeys(found_links))
         links = []
 
-        for link in found_links:
+        for link in unique_links:
             try:
-                scheme = link.split("://")[0]
+                raw_scheme = link.split("://")[0].lower()
+                scheme = "shadowsocks" if raw_scheme == "ss" else raw_scheme
                 links.append(LinkItem(link=link.strip(), source_type=source_type, scheme=scheme))
             except (IndexError, AttributeError):
                 continue
@@ -23,6 +32,7 @@ class LinkProcessor:
     @staticmethod
     def _port_matches(link: str, port_filter: str) -> bool:
         """Проверяет, соответствует ли порт ссылки фильтру (одно значение или диапазон)."""
+        # Hysteria2 и другие протоколы могут указывать порты аналогичным образом в виде :PORT
         m = re.search(r":(\d+)", link)
         if not m:
             return False

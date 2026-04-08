@@ -3,8 +3,8 @@
 
 # FreedomNet - Link Collector (Сборщик ссылок) 🌐
 
-**FreedomNet - Link Collector** — это Python-приложение с современным графическим интерфейсом для автоматической загрузки, фильтрации и управления ссылками конфигураций VPN-клиентов (VLESS, VMess, Trojan, Shadowsocks) из публичных источников.
-Список источников конфигов доступен [на GitHub](https://github.com/AvenCores/goida-vpn-configs.git).
+**FreedomNet - Link Collector** — это Python-приложение с современным графическим интерфейсом для автоматической загрузки, фильтрации и управления ссылками конфигураций VPN-клиентов (VLESS, VMess, Trojan, Shadowsocks, Hysteria2) из публичных источников.
+Огромная благодарность авторам источников конфигов [igareck](https://github.com/igareck/vpn-configs-for-russia) и [AvenCores](https://github.com/AvenCores/goida-vpn-configs).
 
 
 ## 🌟 Возможности

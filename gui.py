@@ -7,7 +7,7 @@ import random
 from typing import List, Dict, Any
 
 # Внутренние импорты модуля
-from config import LANG_STRINGS, SCHEMES, SOURCES
+from config import LANG_STRINGS, SCHEMES, WIRED_MODE_SOURCES, MOBILE_MODE_SOURCES
 from models import LinkItem
 from processor import LinkProcessor
 from network import NetworkManager
@@ -16,14 +16,12 @@ from network import NetworkManager
 class LinkCollectorApp(ctk.CTk):
     """
     Основное GUI-приложение для сбора, фильтрации и отображения ссылок.
-    Таблица занимает всё доступное вертикальное пространство,
-    колонка 'link' растягивается по горизонтали.
     """
     def __init__(self):
         super().__init__()
         self.title(LANG_STRINGS["ru"]["title"])
-        self.geometry("930x620")
-        self.minsize(930, 620)
+        self.geometry("1050x620")
+        self.minsize(1050, 620)
         self.current_lang = "ru"
         self.current_theme = "dark"
         self.set_theme_mode()
@@ -49,7 +47,7 @@ class LinkCollectorApp(ctk.CTk):
         self.init_ui()
         self.update_ui_language()
 
-        # Привязка горячих клавиш к функционалу копирования, сохранения и фильтрации
+        # Привязка горячих клавиш
         self.bind_all("<Control-Key>", self.handle_hotkey)
         self.bind_all("<Command-Key>", self.handle_hotkey)
         self.bind("<Button-1>", self.clear_selection_on_click, add=True)
@@ -57,19 +55,18 @@ class LinkCollectorApp(ctk.CTk):
         self.bind("<Escape>", self.clear_table_selection)
 
     def set_theme_mode(self):
-        """Устанавливает тему интерфейса (светлая/тёмная)."""
         ctk.set_appearance_mode(self.current_theme)
 
     def handle_hotkey(self, event):
-        ctrl_pressed = (event.state & 0x4) != 0  # проверка, что Ctrl удерживается
+        ctrl_pressed = (event.state & 0x4) != 0
         if not ctrl_pressed:
-            return  # без Ctrl игнорируем горячие клавиши
+            return
         
         key_actions = {
-            67: self.copy_selected_links_event,  # Ctrl+C
-            83: self.save_filtered_event,        # Ctrl+S
-            70: self.filter_hotkey_event,        # Ctrl+F
-            76: self.load_hotkey_event            # Ctrl+L
+            67: self.copy_selected_links_event,
+            83: self.save_filtered_event,
+            70: self.filter_hotkey_event,
+            76: self.load_hotkey_event
         }
         action = key_actions.get(event.keycode)
         if action:
@@ -77,21 +74,17 @@ class LinkCollectorApp(ctk.CTk):
             return "break"
 
     def filter_hotkey_event(self, event=None):
-        """Запускает применение фильтра по горячей клавише."""
         self.apply_filter()
         return "break"
 
     def load_hotkey_event(self, event=None):
-        """Запускает загрузку источников по горячей клавише."""
         self.start_loading_thread()
         return "break"
 
     def tr(self, key: str) -> str:
-        """Получение перевода строки по ключу из текущей локализации."""
         return LANG_STRINGS.get(self.current_lang, {}).get(key, f"<{key}>")
 
     def setup_table_styles(self):
-        """Настройка стилей для таблицы и скроллбаров ttk.Treeview."""
         is_dark = self.current_theme == "dark"
 
         bg_color = "#2b2b2b" if is_dark else "#ebebeb"
@@ -147,9 +140,7 @@ class LinkCollectorApp(ctk.CTk):
             self.x_scrollbar.configure(style="Horizontal.TScrollbar")
 
     def init_ui(self):
-        """Инициализация интерфейса, создание и расположение виджетов."""
         self.grid_columnconfigure(0, weight=1)
-        # Гарантирует, что строка с таблицей растянется по вертикали
         self.grid_rowconfigure(2, weight=1)
 
         # Верхняя панель с кнопками действия
@@ -164,39 +155,46 @@ class LinkCollectorApp(ctk.CTk):
         self.copy_button.pack(side="left", padx=5)
         self.save_button = ctk.CTkButton(self.action_frame, width=120, command=self.save_filtered)
         self.save_button.pack(side="left", padx=5)
+        
+        # Переключатель режима (Проводной / Мобильный)
+        self.mode_switch = ctk.CTkSwitch(self.action_frame, text="", command=self.on_mode_change)
+        self.mode_switch.pack(side="left", padx=(20, 5))
+        
+        self.captcha_button = ctk.CTkButton(self.action_frame, text=self.tr('if_captcha_btn'), width=100, command=self.show_captcha_links)
+        
+        self.mode_switch.deselect() # По-умолчанию проводной
 
         # Панель фильтров с комбобоксами и полями ввода
         self.filter_frame = ctk.CTkFrame(self)
         self.filter_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
-        self.filter_frame.grid_columnconfigure((0, 1, 6), weight=0)
-        self.filter_frame.grid_columnconfigure((2, 4), weight=1)
-        self.filter_frame.grid_columnconfigure((3, 5), weight=2)
+        self.filter_frame.grid_columnconfigure((0, 1, 2, 8), weight=0)
+        self.filter_frame.grid_columnconfigure((3, 5), weight=1)
+        self.filter_frame.grid_columnconfigure((4, 6), weight=2)
 
-        self.scheme_combo = ctk.CTkComboBox(self.filter_frame, width=120,
-                                             values=[self.tr('scheme_all')] + SCHEMES,
-                                             state="readonly")
+        self.scheme_combo = ctk.CTkComboBox(self.filter_frame, width=120, state="readonly")
         self.scheme_combo.grid(row=0, column=0, padx=(5, 2), pady=5, sticky="ew")
 
-        self.type_combo = ctk.CTkComboBox(self.filter_frame, width=100,
-                                          values=[self.tr('type_all')] + list(SOURCES.keys()),
-                                          state="readonly")
+        self.type_combo = ctk.CTkComboBox(self.filter_frame, width=140, state="readonly", command=self.on_type_change)
         self.type_combo.grid(row=0, column=1, padx=2, pady=5, sticky="ew")
+        
+        self.subs_combo = ctk.CTkComboBox(self.filter_frame, width=180, state="readonly")
+        self.subs_combo.grid(row=0, column=2, padx=2, pady=5, sticky="ew")
 
-        self.port_entry = ctk.CTkEntry(self.filter_frame, width=115, placeholder_text=self.tr('port_placeholder'))
-        self.port_entry.grid(row=0, column=2, padx=2, pady=5, sticky="ew")
+        self.port_entry = ctk.CTkEntry(self.filter_frame, width=90)
+        self.port_entry.grid(row=0, column=3, padx=2, pady=5, sticky="ew")
         self.port_entry.insert(0, "443")
 
-        self.sni_entry = ctk.CTkEntry(self.filter_frame, placeholder_text=self.tr('sni_placeholder'))
-        self.sni_entry.grid(row=0, column=3, padx=2, pady=5, sticky="ew")
+        self.sni_entry = ctk.CTkEntry(self.filter_frame, width=110)
+        self.sni_entry.grid(row=0, column=4, padx=2, pady=5, sticky="ew")
 
-        self.ip_entry = ctk.CTkEntry(self.filter_frame, width=95, placeholder_text=self.tr('ip_placeholder'))
-        self.ip_entry.grid(row=0, column=4, padx=2, pady=5, sticky="ew")
+        self.ip_entry = ctk.CTkEntry(self.filter_frame, width=95)
+        self.ip_entry.grid(row=0, column=5, padx=2, pady=5, sticky="ew")
 
-        self.generic_entry = ctk.CTkEntry(self.filter_frame, placeholder_text=self.tr('generic_placeholder'))
-        self.generic_entry.grid(row=0, column=5, padx=2, pady=5, sticky="ew")
+        self.generic_entry = ctk.CTkEntry(self.filter_frame)
+        self.generic_entry.grid(row=0, column=6, padx=2, pady=5, sticky="ew")
 
-        self.max_entry = ctk.CTkEntry(self.filter_frame, width=90, placeholder_text=self.tr('max_placeholder'))
-        self.max_entry.grid(row=0, column=6, padx=(2, 5), pady=5, sticky="e")
+        self.max_entry = ctk.CTkEntry(self.filter_frame, width=95)
+        self.max_entry.grid(row=0, column=8, padx=(2, 5), pady=5, sticky="e")
 
         # Основная таблица с прокрутками
         main_table_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -255,14 +253,88 @@ class LinkCollectorApp(ctk.CTk):
         self.status_label = ctk.CTkLabel(self.bottom_frame, text=self.tr('status_wait'), anchor="w")
         self.status_label.pack(side="left", fill="x", expand=True, padx=5)
 
-    def show_notification(self, title: str, message: str, duration: int = 3000):
-        """
-        Показывает всплывающее уведомление с полупрозрачным эффектом и автозакрытием.
+    def on_mode_change(self):
+        is_mobile = self.mode_switch.get() == 1
+        self.mode_switch.configure(text=self.tr('mode_mobile') if is_mobile else self.tr('mode_wired'))
+        if is_mobile:
+            self.captcha_button.pack(side="left", padx=5)
+        else:
+            self.captcha_button.pack_forget()
+        self.on_type_change()
 
-        :param title: Заголовок окна уведомления
-        :param message: Текст сообщения
-        :param duration: Время отображения в мс, затем происходит плавное исчезновение
-        """
+    def show_captcha_links(self):
+        import webbrowser
+        toplevel = ctk.CTkToplevel(self)
+        toplevel.title(self.tr('captcha_links_title'))
+        toplevel.geometry("900x500")
+        toplevel.transient(self)
+        
+        scrollable_frame = ctk.CTkScrollableFrame(toplevel, fg_color="transparent")
+        scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        wired_links = {
+            "BLACK_VLESS_RUS_mobile": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt&lang=de-de",
+            "BLACK_VLESS_RUS": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS.txt&lang=de-de",
+            "BLACK_SS+All_RUS": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_SS+All_RUS.txt&lang=de-de",
+            "BLACK-LIST-1": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/1.txt&lang=de-de",
+            "BLACK-LIST-6": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/6.txt&lang=de-de",
+            "BLACK-LIST-22": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/22.txt&lang=de-de",
+            "BLACK-LIST-23": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/23.txt&lang=de-de",
+            "BLACK-LIST-24": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/24.txt&lang=de-de",
+        }
+
+        wireless_links = {
+            "Vless-Reality-White-Lists-Rus-Mobile": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt&lang=de-de",
+            "less-Reality-White-Lists-Rus-Mobile-2": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile-2.txt&lang=de-de",
+            "WHITE-CIDR-RU-all.txt": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt&lang=de-de",
+            "WHITE-CIDR-26": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt&lang=de-de"
+        }
+
+        def create_category(title, links_dict):
+            cat_label = ctk.CTkLabel(scrollable_frame, text=title, font=("Roboto", 18, "bold"))
+            cat_label.pack(anchor="w", pady=(20, 10), padx=10)
+            
+            for name, url in links_dict.items():
+                item_frame = ctk.CTkFrame(scrollable_frame, fg_color=("gray90", "gray16"), corner_radius=8)
+                item_frame.pack(fill="x", padx=10, pady=5)
+                
+                name_label = ctk.CTkLabel(item_frame, text=name, font=("Roboto", 14, "bold"))
+                name_label.pack(side="left", padx=15, pady=10)
+                
+                link_btn = ctk.CTkButton(
+                    item_frame, text=self.tr("open_link_btn"), font=("Roboto", 12, "bold"),
+                    fg_color="transparent", border_width=1,
+                    text_color=("#1f538d", "#5ea8ff"),
+                    hover_color=("gray85", "gray25"),
+                    command=lambda u=url: webbrowser.open(u)
+                )
+                link_btn.pack(side="right", padx=15, pady=10)
+
+        create_category(self.tr("wired_networks"), wired_links)
+        create_category(self.tr("wireless_networks"), wireless_links)
+        
+        toplevel.grab_set()
+        toplevel.lift()
+        toplevel.focus()
+
+    def on_type_change(self, event=None):
+        current_type = self.type_combo.get()
+        new_subs = [self.tr('sub_all')]
+        
+        sources = MOBILE_MODE_SOURCES if self.mode_switch.get() == 1 else WIRED_MODE_SOURCES
+        
+        if current_type == self.tr('type_all'):
+            new_subs.extend(list(sources["black"].keys()))
+            new_subs.extend(list(sources["white"].keys()))
+        elif current_type == self.tr('type_black'):
+            new_subs.extend(list(sources["black"].keys()))
+        elif current_type == self.tr('type_white'):
+            new_subs.extend(list(sources["white"].keys()))
+            
+        self.subs_combo.configure(values=new_subs)
+        self.subs_combo.set(new_subs[0])
+
+    def show_notification(self, title: str, message: str, duration: int = 3000):
         toplevel = ctk.CTkToplevel(self)
         toplevel.title(title)
         toplevel.overrideredirect(True)
@@ -309,14 +381,9 @@ class LinkCollectorApp(ctk.CTk):
         toplevel.update()
 
     def clear_table_selection(self, event=None):
-        """Снимает текущее выделение в таблице."""
         self.table.selection_remove(self.table.selection())
 
     def clear_selection_on_click(self, event):
-        """
-        При клике вне таблицы или её скроллбаров снимает выделение ссылок.
-        Игнорирует клики по элементам таблицы и скроллбаров.
-        """
         widget_clicked = event.widget
         current = widget_clicked
         while current and current != self:
@@ -330,15 +397,10 @@ class LinkCollectorApp(ctk.CTk):
         self.clear_table_selection()
 
     def copy_selected_links_event(self, event):
-        """Обработчик горячей клавиши копирования ссылок."""
         self.copy_selected_links()
         return "break"
 
     def copy_selected_links(self):
-        """
-        Копирует выделенные ссылки в буфер обмена.
-        Если ничего не выделено, копирует все отфильтрованные ссылки и информирует об этом.
-        """
         selected_iids = self.table.selection()
         if not selected_iids:
             if self.filtered_links:
@@ -363,15 +425,10 @@ class LinkCollectorApp(ctk.CTk):
         self.show_notification(self.tr('copy_info_title'), info_msg)
 
     def save_filtered_event(self, event):
-        """Обработчик горячей клавиши сохранения ссылок."""
         self.save_filtered()
         return "break"
 
     def save_filtered(self):
-        """
-        Сохраняет выделенные или все отфильтрованные ссылки в текстовый файл,
-        выбранный пользователем через диалог сохранения.
-        """
         selected_iids = self.table.selection()
         links_to_save: List[str] = []
         count = 0
@@ -417,37 +474,57 @@ class LinkCollectorApp(ctk.CTk):
                 self._set_status_state(save_type_key, {'count': count, 'file': base_name})
         except Exception as e:
             messagebox.showerror("Error", f"Не удалось сохранить файл: {e}")
-            self._thread_safe_status_update(f"[translate:Ошибка сохранения:] {e}", "error")
+            self._thread_safe_status_update(f"[Ошибка сохранения:] {e}", "error")
 
     def start_loading_thread(self):
-        """Запускает асинхронную загрузку ссылок и блокирует кнопку загрузки."""
         self.load_button.configure(state="disabled")
         self.table.delete(*self.table.get_children())
         self._set_status_state('status_loading', {})
         self.links.clear()
-        # Перед загрузкой растягиваем колонку "link" на всю ширину для удобства
         self.table.column("link", stretch=True, width=600)
-        self.network_manager.load_links_threaded(SOURCES)
+        
+        is_mobile = self.mode_switch.get() == 1
+        sources = MOBILE_MODE_SOURCES if is_mobile else WIRED_MODE_SOURCES
+        sources_to_load = []
+        
+        current_type = self.type_combo.get()
+        current_sub = self.subs_combo.get()
+        
+        if current_sub != self.tr('sub_all'):
+            if current_sub in sources["black"]:
+                sources_to_load.append({"name": current_sub, "type": "black", "url": sources["black"][current_sub]})
+            elif current_sub in sources["white"]:
+                sources_to_load.append({"name": current_sub, "type": "white", "url": sources["white"][current_sub]})
+        else:
+            if current_type in [self.tr('type_all'), self.tr('type_black')]:
+                for name, url in sources["black"].items():
+                    sources_to_load.append({"name": name, "type": "black", "url": url})
+            if current_type in [self.tr('type_all'), self.tr('type_white')]:
+                for name, url in sources["white"].items():
+                    sources_to_load.append({"name": name, "type": "white", "url": url})
+                    
+        self.network_manager.load_links_threaded(sources_to_load, is_mobile=is_mobile)
 
     def on_loading_complete(self, all_links: List[LinkItem]):
-        """Обратный вызов по завершении загрузки ссылок."""
         self.after(0, self._thread_safe_loading_complete, all_links)
 
     def _thread_safe_loading_complete(self, all_links: List[LinkItem]):
-        """Обновляет состояние после окончания загрузки ссылок."""
         self.links = all_links
         self._set_status_state('status_done', {'count': len(self.links)})
         self.load_button.configure(state="normal")
         self.apply_filter()
 
     def show_links(self, links_to_show: List[LinkItem]):
-        """
-        Отображает ссылки в таблице, адаптируя ширину колонки "link" по максимальной длине.
-        Ограничение количества выводимых ссылок задаётся в поле max_entry.
-        """
         self.table.delete(*self.table.get_children())
 
-        unique_links = list({l.link: l for l in links_to_show}.values())
+        # Дедупликация со всех источников (сохраняем порядок)
+        seen = set()
+        unique_links = []
+        for l in links_to_show:
+            if l.link not in seen:
+                seen.add(l.link)
+                unique_links.append(l)
+        
         max_count_str = self.max_entry.get().strip()
         if max_count_str.isdigit():
             max_count = int(max_count_str)
@@ -463,31 +540,36 @@ class LinkCollectorApp(ctk.CTk):
             except Exception:
                 pass
 
-        # Фиксируем ширину колонки под максимальный размер для включения горизонтальной прокрутки
         self.table.column("link", width=max_width + 20, stretch=False)
-        # Обновляем заголовок с сохранением выравнивания
         self.table.heading("link", text=self.tr('table_link'), anchor="w")
 
         for i, item in enumerate(unique_links, start=1):
-            self.table.insert("", "end", iid=item.link, values=(i, item.link))
+            self.table.insert("", "end", iid=str(i), values=(i, item.link))
 
         self.filtered_links = unique_links
 
     def apply_filter(self):
-        """Применяет выбранные фильтры к списку ссылок и обновляет таблицу."""
         if not self.links:
             self._set_status_state('status_wait', {})
             return
 
+        type_str = self.type_combo.get()
+        if type_str == self.tr('type_black'):
+            mapped_type = "black"
+        elif type_str == self.tr('type_white'):
+            mapped_type = "white"
+        else:
+            mapped_type = ""
+
         filters = {
             "scheme": self.scheme_combo.get(),
-            "type": self.type_combo.get(),
+            "type": mapped_type,
             "port": self.port_entry.get().strip(),
             "sni_value": self.sni_entry.get().strip(),
             "ip": self.ip_entry.get().strip(),
             "generic_search": self.generic_entry.get().strip(),
             "all_schemes_str": self.tr('scheme_all'),
-            "all_types_str": self.tr('type_all'),
+            "all_types_str": "", 
         }
 
         filtered_list, error = self.processor.filter_links(self.links, filters)
@@ -502,7 +584,6 @@ class LinkCollectorApp(ctk.CTk):
             self._set_status_state('status_filtered', {'count': len(self.filtered_links)})
 
     def _set_status_state(self, key: str, args: Dict[str, Any]):
-        """Обновляет статус бар с текстом из локализации и аргументами."""
         self.last_status_key = key
         self.last_status_args = args
         try:
@@ -513,7 +594,6 @@ class LinkCollectorApp(ctk.CTk):
         self.after(10, self._truncate_status_text)
 
     def _truncate_status_text(self, event=None):
-        """Обрезает текст статуса по ширине панели, добавляя '...' при необходимости."""
         if not self.full_status_message:
             return
         frame_width = self.bottom_frame.winfo_width()
@@ -527,23 +607,30 @@ class LinkCollectorApp(ctk.CTk):
             self.status_label.configure(text=self.full_status_message)
 
     def _on_bottom_frame_resize(self, event):
-        """Обрабатывает событие изменения размера панели статуса для обновления текста."""
         self.after(10, self._truncate_status_text)
 
     def update_status(self, message: str, level: str):
-        """Обновляет статус приложения по сообщениям из NetworkManager."""
+        if level == "captcha":
+            self.after(0, self._show_captcha_notification, message)
+            key_to_translate = "status_captcha"
+            args = {"name": message}
+            self.after(0, self._set_status_state, key_to_translate, args)
+            return
+
         key_to_translate = ""
         args: Dict[str, Any] = {}
 
         if message.startswith("Loading: "):
             key_to_translate = "status_loading_url"
             args = {"url": message[9:]}
-        elif message.startswith("Loaded: "):
-            key_to_translate = "status_loaded_source"
-            args = {"source": message[8:]}
-        elif message.startswith("Error: "):
-            key_to_translate = "status_error_source"
-            args = {"error": message[7:]}
+        elif message.startswith("[OK] "):
+            parts = message[5:].split(" links from ")
+            key_to_translate = "status_ok"
+            args = {"count": parts[0], "name": parts[1] if len(parts)>1 else ""}
+        elif message.startswith("[ERROR] "):
+            parts = message[8:].split(": ", 1)
+            key_to_translate = "status_error"
+            args = {"name": parts[0], "error": parts[1] if len(parts)>1 else ""}
         else:
             self.after(0, self._thread_safe_status_update, message, level)
             return
@@ -551,21 +638,24 @@ class LinkCollectorApp(ctk.CTk):
         if key_to_translate:
             self.after(0, self._set_status_state, key_to_translate, args)
 
+    def _show_captcha_notification(self, name):
+        title = self.tr('captcha_error_title')
+        msg = self.tr('captcha_error_msg').format(name=name)
+        self.show_notification(title, msg, duration=5000)
+
     def _thread_safe_status_update(self, message: str, level: str):
-        """Обновляет статус в UI, безопасно вызывая из потоков."""
         self.full_status_message = message
         self.status_label.configure(text=message)
         self.after(10, self._truncate_status_text)
 
     def toggle_language(self):
-        """Переключает язык интерфейса и обновляет UI."""
         self.current_lang = "en" if self.current_lang == "ru" else "ru"
         self.update_ui_language()
 
     def update_ui_language(self):
-        """Обновляет тексты и подсказки всех виджетов в соответствии с текущим языком."""
         current_scheme_val = self.scheme_combo.get()
         current_type_val = self.type_combo.get()
+        current_sub_val = self.subs_combo.get()
 
         self.title(self.tr('title'))
         self.load_button.configure(text=self.tr('load'))
@@ -573,16 +663,25 @@ class LinkCollectorApp(ctk.CTk):
         self.copy_button.configure(text=self.tr('copy_btn'))
         self.save_button.configure(text=self.tr('save_btn'))
 
-        all_schemes = self.tr('scheme_all')
-        all_types = self.tr('type_all')
+        is_mobile = self.mode_switch.get() == 1
+        self.mode_switch.configure(text=self.tr('mode_mobile') if is_mobile else self.tr('mode_wired'))
+        
+        if hasattr(self, 'captcha_button'):
+            self.captcha_button.configure(text=self.tr('if_captcha_btn'))
 
+        all_schemes = self.tr('scheme_all')
         self.scheme_combo.configure(values=[all_schemes] + SCHEMES)
         scheme_set_val = current_scheme_val if current_scheme_val in SCHEMES else all_schemes
         self.scheme_combo.set(scheme_set_val if scheme_set_val in self.scheme_combo.cget('values') else all_schemes)
 
-        self.type_combo.configure(values=[all_types] + list(SOURCES.keys()))
-        type_set_val = current_type_val if current_type_val in SOURCES.keys() else all_types
-        self.type_combo.set(type_set_val if type_set_val in self.type_combo.cget('values') else all_types)
+        type_values = [self.tr('type_all'), self.tr('type_black'), self.tr('type_white')]
+        self.type_combo.configure(values=type_values)
+        if current_type_val not in type_values:
+            self.type_combo.set(type_values[0])
+            
+        self.on_type_change()
+        if current_sub_val in self.subs_combo.cget('values'):
+            self.subs_combo.set(current_sub_val)
 
         self.port_entry.configure(placeholder_text=self.tr('port_placeholder'))
         self.sni_entry.configure(placeholder_text=self.tr('sni_placeholder'))
@@ -605,7 +704,6 @@ class LinkCollectorApp(ctk.CTk):
             self._set_status_state(self.last_status_key, self.last_status_args)
 
     def toggle_theme(self):
-        """Переключает тему интерфейса и обновляет стили."""
         self.current_theme = self.theme_switch.get()
         self.set_theme_mode()
         self.setup_table_styles()

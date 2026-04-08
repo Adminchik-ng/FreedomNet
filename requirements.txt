@@ -1,2 +1,2 @@
+curl_cffi==0.15.0
 customtkinter==5.2.2
-requests==2.32.3
