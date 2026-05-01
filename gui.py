@@ -6,7 +6,6 @@ import os
 import random
 from typing import List, Dict, Any
 
-# Внутренние импорты модуля
 from config import LANG_STRINGS, SCHEMES, WIRED_MODE_SOURCES, MOBILE_MODE_SOURCES
 from models import LinkItem
 from processor import LinkProcessor
@@ -287,7 +286,8 @@ class LinkCollectorApp(ctk.CTk):
             "Vless-Reality-White-Lists-Rus-Mobile": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt&lang=de-de",
             "less-Reality-White-Lists-Rus-Mobile-2": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile-2.txt&lang=de-de",
             "WHITE-CIDR-RU-all.txt": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt&lang=de-de",
-            "WHITE-CIDR-26": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt&lang=de-de"
+            "WHITE-CIDR-26": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt&lang=de-de",
+            "VLESS-UNIVERSAL": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/zieng2/wl/main/vless_universal.txt&lang=de-de",
         }
 
         def create_category(title, links_dict):

@@ -5,7 +5,7 @@ SCHEMES: List[str] = ["vless", "vmess", "trojan", "shadowsocks", "hysteria2"]
 
 # Источники для режима "Проводной интернет"
 WIRED_MODE_SOURCES = {
-    "black": { # ЧЕРНЫЕ СПИСКИ (для проводных сетей)
+    "black": {
         "BLACK_VLESS_RUS_mobile": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt",
         "BLACK_VLESS_RUS": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS.txt",
         "BLACK_SS+All_RUS": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_SS+All_RUS.txt",
@@ -15,17 +15,18 @@ WIRED_MODE_SOURCES = {
         "BLACK-LIST-23": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/23.txt",
         "BLACK-LIST-24": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/24.txt",
     },
-    "white": { # БЕЛЫЕ СПИСКИ (для беспроводных сетей)
+    "white": {
         "Vless-Reality-White-Lists-Rus-Mobile": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt",
         "Vless-Reality-White-Lists-Rus-Mobile-2": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile-2.txt",
         "WHITE-CIDR-RU-all.txt": "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt",
         "WHITE-CIDR-26": "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt",
+        "VLESS-UNIVERSAL": "https://raw.githubusercontent.com/zieng2/wl/main/vless_universal.txt",
     }
 }
 
 # Источники для режима "Мобильный интернет"
 MOBILE_MODE_SOURCES = {
-    "black": { # ЧЕРНЫЕ СПИСКИ (для проводных сетей)
+    "black": {
         "BLACK_VLESS_RUS_mobile": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt&lang=de-de",
         "BLACK_VLESS_RUS": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS.txt&lang=de-de",
         "BLACK_SS+All_RUS": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_SS+All_RUS.txt&lang=de-de",
@@ -35,11 +36,12 @@ MOBILE_MODE_SOURCES = {
         "BLACK-LIST-23": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/23.txt&lang=de-de",
         "BLACK-LIST-24": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/24.txt&lang=de-de",
     },
-    "white": { # БЕЛЫЕ СПИСКИ (для беспроводных сетей)
+    "white": {
         "Vless-Reality-White-Lists-Rus-Mobile": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt&lang=de-de",
         "Vless-Reality-White-Lists-Rus-Mobile-2": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile-2.txt&lang=de-de",
         "WHITE-CIDR-RU-all.txt": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt&lang=de-de",
         "WHITE-CIDR-26": "https://translate.yandex.ru/translate?url=https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt&lang=de-de",
+        "VLESS-UNIVERSAL": "https://translate.yandex.ru/translate?url=https://raw.githubusercontent.com/zieng2/wl/main/vless_universal.txt&lang=de-de",
     }
 }
 
